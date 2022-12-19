@@ -1,0 +1,52 @@
+version: 0.2
+env:
+
+  git-credential-helper: yes
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+
+    commands:
+        # install python & git
+        - echo "STARTING PIP & GRC INSTALLATION"
+        - "python --version"
+        - curl -O https://bootstrap.pypa.io/get-pip.py
+        - python get-pip.py --user
+        - pip install git-remote-codecommit
+
+  pre_build:
+    on-failure: ABORT 
+    commands:
+        # run build script
+        - npm install
+        - npx hardhat compile  # need to befirst to create artifacts (create fodler in directory)
+        - npx hardhat test
+  build:
+    on-failure: ABORT
+    commands:
+        - npm run deploy:testnet # create json file which need to be at last phase. (better to send in git branch /stage/, need to be forwardet to sites gitlab -> that will go to hook build for site -> )
+
+  post_build:
+    commands:
+        # Clone directories
+        - echo CLONE DIRECTORIES
+        - git clone --single-branch --branch staging codecommit::eu-west-2://reactjs-swap-lovely-finance
+        - git clone --single-branch --branch staging codecommit::eu-west-2://nestjs-swap-service-lovely-finance
+        # Copy files and commit changes
+        - echo COPYING ARTIFACTS
+        - cp ./addresses.json ./artifacts
+        - cp -r ./artifacts ./reactjs-swap-lovely-finance/src
+        - cp -r ./artifacts ./nestjs-swap-service-lovely-finance/src && chmod +x ./commit.sh && ./commit.sh
+        - cd ./reactjs-swap-lovely-finance && git add . && git commit -m "update artifacts" && git push && cd ..
+        - cd ./nestjs-swap-service-lovely-finance && git add . && git commit -m "update artifacts" && git push
+
+artifacts:
+  # include all files required to run application
+  # notably excluded is node_modules, as this will cause overwrite error on deploy
+  files:
+#    - contracts/**/*
+#    - scripts/*
+#    - tests/*
+    - 'artifacts/*'

@@ -1,0 +1,22 @@
+{
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "hardhat": "^2.10.1"
+  },
+  "scripts": {
+    "deploy:testnet": "npx hardhat run --network testnet scripts/deploy.ts && ./flat.sh",
+    "test:testnet": "npx hardhat run --network testnet scripts/test.ts",
+    "test:deploy": "npx hardhat run --network testnet scripts/deploy.ts"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.2",
+    "@openzeppelin/contracts-upgradeable": "^4.7.3",
+    "@uniswap/sdk": "^3.0.3",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "chai": "^4.3.6",
+    "ethers": "^5.6.9",
+    "moment": "^2.29.4"
+  }
+}
